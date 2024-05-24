@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	 xmlns="http://www.tibco.com/schemas/Suply/SharedConnections/Schema.xsd"
+	 targetNamespace="http://www.tibco.com/schemas/Suply/SharedConnections/Schema.xsd"
+	 elementFormDefault="qualified"
+	 attributeFormDefault="unqualified">
+	<xs:element name="SUPPLY">
+		<xs:complexType>
+			<xs:sequence>
+				<xs:element ref="SHOP" minOccurs="0"/>
+				<xs:element ref="ITEM" minOccurs="0"/>
+				<xs:element ref="AVLQNTY" minOccurs="0"/>
+				<xs:element ref="STATE" minOccurs="0"/>
+				<xs:element ref="COUNTRY" minOccurs="0"/>
+				<xs:element ref="LASTUPDATEDON" minOccurs="0"/>
+			</xs:sequence>
+		</xs:complexType>
+	</xs:element>
+	<xs:element name="SHOP" type="xs:string"/>
+	<xs:element name="ITEM" type="xs:string"/>
+	<xs:element name="AVLQNTY" type="xs:int"/>
+	<xs:element name="STATE" type="xs:string"/>
+	<xs:element name="COUNTRY" type="xs:string"/>
+	<xs:element name="LASTUPDATEDON" type="xs:date"/>
+</xs:schema>

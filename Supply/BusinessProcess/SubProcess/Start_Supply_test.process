@@ -1,0 +1,286 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<pd:ProcessDefinition xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:pfx="http://www.tibco.com/schemas/Suply/SharedConnections/Schema.xsd" xmlns:tib="http://www.tibco.com/bw/xslt/custom-functions" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:pd="http://xmlns.tibco.com/bw/process/2003">
+    <xsd:import namespace="http://www.tibco.com/schemas/Suply/SharedConnections/Schema.xsd" schemaLocation="/SharedConnections/Schema.xsd"/>
+    <pd:name>BusinessProcess/SubProcess/Start_Supply_test.process</pd:name>
+    <pd:startName>HTTP Receiver</pd:startName>
+    <pd:startX>0</pd:startX>
+    <pd:startY>0</pd:startY>
+    <pd:returnBindings/>
+    <pd:starter name="HTTP Receiver">
+        <pd:type>com.tibco.plugin.http.HTTPEventSource</pd:type>
+        <pd:resourceType>httppalette.httpEventSource</pd:resourceType>
+        <pd:x>222</pd:x>
+        <pd:y>119</pd:y>
+        <config>
+            <outputMode>String</outputMode>
+            <defaultEncoding>ISO8859_1</defaultEncoding>
+            <inputOutputVersion>5.3.0</inputOutputVersion>
+            <newMimeSupport>true</newMimeSupport>
+            <sharedChannel>/SharedConnections/HTTP Connection.sharedhttp</sharedChannel>
+            <Headers>
+                <xsd:element name="root">
+                    <xsd:complexType>
+                        <xsd:sequence>
+                            <xsd:element name="Accept" type="xsd:string" minOccurs="0"/>
+                            <xsd:element name="Accept-Charset" type="xsd:string" minOccurs="0"/>
+                            <xsd:element name="Accept-Encoding" type="xsd:string" minOccurs="0"/>
+                            <xsd:element name="Content-Type" type="xsd:string" minOccurs="0"/>
+                            <xsd:element name="Content-Length" type="xsd:string" minOccurs="0"/>
+                            <xsd:element name="Connection" type="xsd:string" minOccurs="0"/>
+                            <xsd:element name="Cookie" type="xsd:string" minOccurs="0"/>
+                            <xsd:element name="Pragma" type="xsd:string" minOccurs="0"/>
+                        </xsd:sequence>
+                    </xsd:complexType>
+                </xsd:element>
+            </Headers>
+        </config>
+        <pd:inputBindings/>
+    </pd:starter>
+    <pd:endName>End</pd:endName>
+    <pd:endX>887</pd:endX>
+    <pd:endY>120</pd:endY>
+    <pd:errorSchemas/>
+    <pd:processVariables/>
+    <pd:targetNamespace>http://xmlns.example.com/1714764088824</pd:targetNamespace>
+    <pd:activity name="Log_End">
+        <pd:type>com.tibco.pe.core.CallProcessActivity</pd:type>
+        <pd:resourceType>ae.process.subprocess</pd:resourceType>
+        <pd:x>796</pd:x>
+        <pd:y>120</pd:y>
+        <config>
+            <processName>/BusinessProcess/SubProcess/Logging_Process.process</processName>
+        </config>
+        <pd:inputBindings>
+            <root>
+                <Message>
+                    <xsl:value-of select="&quot;Process Start_Supply Ended&quot;"/>
+                </Message>
+            </root>
+        </pd:inputBindings>
+    </pd:activity>
+    <pd:activity name="Log_Start">
+        <pd:type>com.tibco.pe.core.CallProcessActivity</pd:type>
+        <pd:resourceType>ae.process.subprocess</pd:resourceType>
+        <pd:x>328</pd:x>
+        <pd:y>119</pd:y>
+        <config>
+            <processName>/BusinessProcess/SubProcess/Logging_Process.process</processName>
+        </config>
+        <pd:inputBindings>
+            <root>
+                <Message>
+                    <xsl:value-of select="&quot;Process Start_Supply Started&quot;"/>
+                </Message>
+            </root>
+        </pd:inputBindings>
+    </pd:activity>
+    <pd:activity name="Send HTTP Response">
+        <pd:type>com.tibco.plugin.http.HTTPResponseActivity</pd:type>
+        <pd:resourceType>httppalette.httpWebResponse</pd:resourceType>
+        <pd:x>691</pd:x>
+        <pd:y>120</pd:y>
+        <config>
+            <closeConnection>true</closeConnection>
+            <eventSource>HTTP Receiver</eventSource>
+            <Headers>
+                <xsd:element name="root">
+                    <xsd:complexType>
+                        <xsd:sequence>
+                            <xsd:element name="StatusLine" type="xsd:string" minOccurs="0"/>
+                            <xsd:element name="Content-Type" type="xsd:string" minOccurs="0"/>
+                            <xsd:element name="Set-Cookie" type="xsd:string" minOccurs="0"/>
+                            <xsd:element name="Pragma" type="xsd:string" minOccurs="0"/>
+                            <xsd:element name="Location" type="xsd:string" minOccurs="0"/>
+                        </xsd:sequence>
+                    </xsd:complexType>
+                </xsd:element>
+            </Headers>
+        </config>
+        <pd:inputBindings>
+            <ResponseActivityInput>
+                <asciiContent>
+                    <xsl:value-of select="tib:render-xml($Map-Data/pfx:SUPPLY)"/>
+                </asciiContent>
+            </ResponseActivityInput>
+        </pd:inputBindings>
+    </pd:activity>
+    <pd:activity name="Map Data">
+        <pd:type>com.tibco.plugin.mapper.MapperActivity</pd:type>
+        <pd:resourceType>ae.activities.MapperActivity</pd:resourceType>
+        <pd:x>440</pd:x>
+        <pd:y>121</pd:y>
+        <config>
+            <element ref="pfx:SUPPLY"/>
+        </config>
+        <pd:inputBindings>
+            <xsl:variable name="ExtractCurrentDate" select="tib:get-day-from-date(current-date())"/>
+            <xsl:variable name="ExtractCurrentMonth" select="tib:get-month-from-date(current-date())"/>
+            <xsl:variable name="ExtractCurrentYear" select="tib:get-year-from-date(current-date())"/>
+            <pfx:SUPPLY>
+                <pfx:SHOP>
+                    <xsl:value-of select="substring-after(substring-before(substring-before(tib:substring-before-last(substring-after(substring-after($HTTP-Receiver/ProcessStarterOutput/PostData, '{'),'{'), '}'), '}'), ','), ':')"/>
+                </pfx:SHOP>
+                <pfx:ITEM>
+                    <xsl:value-of select="substring-before(tib:substring-before-last(tib:substring-before-last(substring-after(substring-after(substring-after(substring-after($HTTP-Receiver/ProcessStarterOutput/PostData, '{'),'{'),','),':'), '}'), '}'), ',')"/>
+                </pfx:ITEM>
+                <pfx:AVLQNTY>
+                    <xsl:value-of select="substring-after(substring-before(substring-after(tib:substring-before-last(tib:substring-before-last(substring-after(substring-after(substring-after(substring-after($HTTP-Receiver/ProcessStarterOutput/PostData, '{'),'{'),','),':'), '}'), '}'), ','), ','),':')"/>
+                </pfx:AVLQNTY>
+                <pfx:STATE>
+                    <xsl:value-of select="substring-after(substring-before(substring-after(substring-after(tib:substring-before-last(tib:substring-before-last(substring-after(substring-after(substring-after(substring-after($HTTP-Receiver/ProcessStarterOutput/PostData, '{'),'{'),','),':'), '}'), '}'), ','),','),','),':')"/>
+                </pfx:STATE>
+                <pfx:COUNTRY>
+                    <xsl:value-of select="substring-after(substring-after(tib:substring-before-last(substring-after(substring-after(tib:substring-before-last(tib:substring-before-last(substring-after(substring-after(substring-after(substring-after($HTTP-Receiver/ProcessStarterOutput/PostData, '{'),'{'),','),':'), '}'), '}'), ','),','), ','), ','),':')"/>
+                </pfx:COUNTRY>
+                <pfx:LASTUPDATEDON>
+                    <xsl:value-of select="tib:create-date($ExtractCurrentYear, $ExtractCurrentMonth, $ExtractCurrentDate)"/>
+                </pfx:LASTUPDATEDON>
+            </pfx:SUPPLY>
+        </pd:inputBindings>
+    </pd:activity>
+    <pd:activity name="JDBC Update">
+        <pd:type>com.tibco.plugin.jdbc.JDBCUpdateActivity</pd:type>
+        <pd:resourceType>ae.activities.JDBCUpdateActivity</pd:resourceType>
+        <pd:x>565</pd:x>
+        <pd:y>75</pd:y>
+        <config>
+            <timeout>10</timeout>
+            <commit>false</commit>
+            <emptyStrAsNil>false</emptyStrAsNil>
+            <jdbcSharedConfig>/SharedConnections/JDBC Connection.sharedjdbc</jdbcSharedConfig>
+            <statement>insert into supply (SHOP,ITEM,AVLQNTY,STATE,COUNTRY,LASTUPDATEDON) values (?,?,?,?,?,?)</statement>
+            <Prepared_Param_DataType>
+                <parameter>
+                    <parameterName>SHOP</parameterName>
+                    <dataType>VARCHAR</dataType>
+                </parameter>
+                <parameter>
+                    <parameterName>ITEM</parameterName>
+                    <dataType>VARCHAR</dataType>
+                </parameter>
+                <parameter>
+                    <parameterName>AVLQNTY</parameterName>
+                    <dataType>INTEGER</dataType>
+                </parameter>
+                <parameter>
+                    <parameterName>STATE</parameterName>
+                    <dataType>VARCHAR</dataType>
+                </parameter>
+                <parameter>
+                    <parameterName>COUNTRY</parameterName>
+                    <dataType>VARCHAR</dataType>
+                </parameter>
+                <parameter>
+                    <parameterName>LASTUPDATEDON</parameterName>
+                    <dataType>DATE</dataType>
+                </parameter>
+            </Prepared_Param_DataType>
+        </config>
+        <pd:inputBindings>
+            <jdbcUpdateActivityInput>
+                <SHOP>
+                    <xsl:choose>
+                        <xsl:when test="exists($Map-Data/pfx:SUPPLY/pfx:SHOP)">
+                            <xsl:value-of select="$Map-Data/pfx:SUPPLY/pfx:SHOP"/>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:attribute name="xsi:nil">true</xsl:attribute>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </SHOP>
+                <ITEM>
+                    <xsl:choose>
+                        <xsl:when test="exists($Map-Data/pfx:SUPPLY/pfx:ITEM)">
+                            <xsl:value-of select="$Map-Data/pfx:SUPPLY/pfx:ITEM"/>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:attribute name="xsi:nil">true</xsl:attribute>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </ITEM>
+                <AVLQNTY>
+                    <xsl:choose>
+                        <xsl:when test="exists($Map-Data/pfx:SUPPLY/pfx:AVLQNTY)">
+                            <xsl:value-of select="$Map-Data/pfx:SUPPLY/pfx:AVLQNTY"/>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:attribute name="xsi:nil">true</xsl:attribute>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </AVLQNTY>
+                <STATE>
+                    <xsl:choose>
+                        <xsl:when test="exists($Map-Data/pfx:SUPPLY/pfx:STATE)">
+                            <xsl:value-of select="$Map-Data/pfx:SUPPLY/pfx:STATE"/>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:attribute name="xsi:nil">true</xsl:attribute>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </STATE>
+                <COUNTRY>
+                    <xsl:choose>
+                        <xsl:when test="exists($Map-Data/pfx:SUPPLY/pfx:COUNTRY)">
+                            <xsl:value-of select="$Map-Data/pfx:SUPPLY/pfx:COUNTRY"/>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:attribute name="xsi:nil">true</xsl:attribute>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </COUNTRY>
+                <LASTUPDATEDON>
+                    <xsl:choose>
+                        <xsl:when test="exists($Map-Data/pfx:SUPPLY/pfx:LASTUPDATEDON)">
+                            <xsl:value-of select="$Map-Data/pfx:SUPPLY/pfx:LASTUPDATEDON"/>
+                        </xsl:when>
+                        <xsl:otherwise>
+                            <xsl:attribute name="xsi:nil">true</xsl:attribute>
+                        </xsl:otherwise>
+                    </xsl:choose>
+                </LASTUPDATEDON>
+            </jdbcUpdateActivityInput>
+        </pd:inputBindings>
+    </pd:activity>
+    <pd:transition>
+        <pd:from>HTTP Receiver</pd:from>
+        <pd:to>Log_Start</pd:to>
+        <pd:lineType>Default</pd:lineType>
+        <pd:lineColor>-16777216</pd:lineColor>
+        <pd:conditionType>always</pd:conditionType>
+    </pd:transition>
+    <pd:transition>
+        <pd:from>Log_End</pd:from>
+        <pd:to>End</pd:to>
+        <pd:lineType>Default</pd:lineType>
+        <pd:lineColor>-16777216</pd:lineColor>
+        <pd:conditionType>always</pd:conditionType>
+    </pd:transition>
+    <pd:transition>
+        <pd:from>Send HTTP Response</pd:from>
+        <pd:to>Log_End</pd:to>
+        <pd:lineType>Default</pd:lineType>
+        <pd:lineColor>-16777216</pd:lineColor>
+        <pd:conditionType>always</pd:conditionType>
+    </pd:transition>
+    <pd:transition>
+        <pd:from>Log_Start</pd:from>
+        <pd:to>Map Data</pd:to>
+        <pd:lineType>Default</pd:lineType>
+        <pd:lineColor>-16777216</pd:lineColor>
+        <pd:conditionType>always</pd:conditionType>
+    </pd:transition>
+    <pd:transition>
+        <pd:from>Map Data</pd:from>
+        <pd:to>JDBC Update</pd:to>
+        <pd:lineType>Default</pd:lineType>
+        <pd:lineColor>-16777216</pd:lineColor>
+        <pd:conditionType>always</pd:conditionType>
+    </pd:transition>
+    <pd:transition>
+        <pd:from>JDBC Update</pd:from>
+        <pd:to>Send HTTP Response</pd:to>
+        <pd:lineType>Default</pd:lineType>
+        <pd:lineColor>-16777216</pd:lineColor>
+        <pd:conditionType>always</pd:conditionType>
+    </pd:transition>
+</pd:ProcessDefinition>
